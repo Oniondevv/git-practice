@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Evaluation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        input[type="radio"] {
+            cursor: pointer;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #28a745;
+            border-radius: 5px;
+        }
+
+        canvas {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Faculty Evaluation Performance</h1>
+        <form id="evaluationForm">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Strongly Disagree</th>
+                        <th>Disagree</th>
+                        <th>Neutral</th>
+                        <th>Agree</th>
+                        <th>Strongly Agree</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Was the instructor clear in their explanations?</td>
+                        <td><input type="radio" name="q1" value="1"></td>
+                        <td><input type="radio" name="q1" value="2"></td>
+                        <td><input type="radio" name="q1" value="3"></td>
+                        <td><input type="radio" name="q1" value="4"></td>
+                        <td><input type="radio" name="q1" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Did the instructor engage with students?</td>
+                        <td><input type="radio" name="q2" value="1"></td>
+                        <td><input type="radio" name="q2" value="2"></td>
+                        <td><input type="radio" name="q2" value="3"></td>
+                        <td><input type="radio" name="q2" value="4"></td>
+                        <td><input type="radio" name="q2" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Was the course material relevant?</td>
+                        <td><input type="radio" name="q3" value="1"></td>
+                        <td><input type="radio" name="q3" value="2"></td>
+                        <td><input type="radio" name="q3" value="3"></td>
+                        <td><input type="radio" name="q3" value="4"></td>
+                        <td><input type="radio" name="q3" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Was the feedback provided helpful?</td>
+                        <td><input type="radio" name="q4" value="1"></td>
+                        <td><input type="radio" name="q4" value="2"></td>
+                        <td><input type="radio" name="q4" value="3"></td>
+                        <td><input type="radio" name="q4" value="4"></td>
+                        <td><input type="radio" name="q4" value="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Would you recommend this course?</td>
+                        <td><input type="radio" name="q5" value="1"></td>
+                        <td><input type="radio" name="q5" value="2"></td>
+                        <td><input type="radio" name="q5" value="3"></td>
+                        <td><input type="radio" name="q5" value="4"></td>
+                        <td><input type="radio" name="q5" value="5"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" id="submitBtn">Submit</button>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </form>
+
+        <!-- Pie Chart -->
+        <canvas id="pieChart" width="400" height="400"></canvas>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const totalQuestions = 5;
+            const responses = {
+                "Strongly Disagree": 0,
+                "Disagree": 0,
+                "Neutral": 0,
+                "Agree": 0,
+                "Strongly Agree": 0
+            };
+            const checkedRadios = Array.from(document.querySelectorAll('input[type="radio"]:checked'));
+
+            if (checkedRadios.length === totalQuestions) {
+                checkedRadios.forEach(radio => {
+                    const value = parseInt(radio.value);
+                    switch(value) {
+                        case 1:
+                            responses["Strongly Disagree"]++;
+                            break;
+                        case 2:
+                            responses["Disagree"]++;
+                            break;
+                        case 3:
+                            responses["Neutral"]++;
+                            break;
+                        case 4:
+                            responses["Agree"]++;
+                            break;
+                        case 5:
+                            responses["Strongly Agree"]++;
+                            break;
+                    }
+                });
+
+                // Display the pie chart
+                const ctx = document.getElementById('pieChart').getContext('2d');
+                const totalResponses = Object.values(responses).reduce((a, b) => a + b, 0);
+                const percentages = Object.values(responses).map(count => (count / totalResponses) * 100);
+
+                const pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(responses),
+                        datasets: [{
+                            label: 'Response Distribution',
+                            data: percentages,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Faculty Evaluation Responses'
+                        }
+                    }
+                });
+
+                alert(`Thank you for your feedback!`);
+            } else {
+                alert(`Please answer all questions.`);
+            }
+        });
+    </script>
+</body>
+</html>
